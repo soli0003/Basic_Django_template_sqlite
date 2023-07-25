@@ -1,6 +1,6 @@
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from django.http import JsonResponse
-from .models import Product
+from .models import Category, Product
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
@@ -48,6 +48,7 @@ class MyTokenObtainPairView(TokenObtainPairView):
 def index(req):
     return Response("hello")
 
+# ----------------------------------------------------------------------------------------------------- CRUD ----------------------------------------------------------------------------------------------------------#
 
 class products_view(APIView):
     # permission_classes = [IsAuthenticated]
@@ -60,13 +61,12 @@ class products_view(APIView):
             serializer = ProductSerializer(my_model, many=True)
             return Response(serializer.data)
 
-    def post(self, request, category=None):
+    def post(self, request):
         serializer = ProductSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(category=category)  # Set the category field
+            serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
     def put(self, request, pk):
         my_model = Product.objects.get(pk=pk)
@@ -85,3 +85,11 @@ class products_view(APIView):
         my_model = Product.objects.filter(category=category)
         serializer = ProductSerializer(my_model, many=True)
         return Response(serializer.data)
+# ----------------------------------------------------------------------------------------------------- Add Category ----------------------------------------------------------------------------------------------------------#
+@api_view(['Post'])
+def addCategory(request):
+        serializer = CategorySerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()  # Set the category field
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
